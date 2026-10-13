@@ -1,0 +1,201 @@
+%% ============================================================================
+%%  Web-Based Talent Mapping System for FSTP Lecturers
+%%  Entity Relationship Diagram (ERD) - Mermaid source
+%%  UPNM | FSTP | PSM 2241073 Lailati binti Mohd
+%%  Stack: PHP 8.2 + MySQL/MariaDB 10.4 (XAMPP) + Bootstrap 5
+%%  Database name: fstp_talent_map
+%%  Tables: 14   |   Relationships: 15
+%%  Render: https://mermaid.live  |  VS Code "Markdown Preview Mermaid Support"
+%% ============================================================================
+
+erDiagram
+
+    %% ---------------- RELATIONSHIPS ----------------
+    USERS                  ||--|| LECTURERS            : "1:1  akaun log masuk"
+    DEPARTMENTS            ||--o{ USERS                : "1:M  pengguna dalam jabatan"
+    DEPARTMENTS            ||--o{ LECTURERS            : "1:M  pensyarah dalam jabatan"
+    EXPERTISE_CATEGORIES   ||--o{ EXPERTISE            : "1:M  kategori bidang"
+    LECTURERS              ||--o{ LECTURER_EXPERTISE   : "1:M  memiliki kepakaran"
+    EXPERTISE              ||--o{ LECTURER_EXPERTISE   : "1:M  dipakai oleh pensyarah"
+    LECTURERS              ||--o{ RESEARCH             : "1:M  penyelidikan"
+    LECTURERS              ||--o{ PUBLICATIONS         : "1:M  penerbitan"
+    LECTURERS              ||--o{ CERTIFICATIONS       : "1:M  pensijilan"
+    LECTURERS              ||--o{ TRAINING             : "1:M  latihan"
+    LECTURERS              ||--o{ CONSULTANCY          : "1:M  konsultansi"
+    LECTURERS              ||--o{ ACHIEVEMENTS         : "1:M  pencapaian"
+    LECTURERS              ||--o{ DOCUMENTS            : "1:M  dokumen sokongan"
+    USERS                  ||--o{ ACTIVITY_LOG         : "1:M  log aktiviti"
+    USERS                  ||--o{ DOCUMENTS            : "1:M  dimuat naik oleh"
+
+    %% ---------------- TABLES ----------------
+
+    USERS {
+        int        user_id       PK "AUTO_INCREMENT"
+        varchar    username      UK "NOT NULL, 50 - untuk log masuk"
+        varchar    email         UK "NOT NULL, 100"
+        varchar    password         "NOT NULL, 255 - password_hash() bcrypt"
+        enum       role             "admin | lecturer"
+        int        department_id FK "NULL - rujuk DEPARTMENTS"
+        enum       status           "active | inactive, default active"
+        varchar    initial_password "NULL, 50 - paparan sekali sahaja (reset oleh Admin)"
+        datetime   last_login       "NULL"
+        datetime   created_at       "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    LECTURERS {
+        int        lecturer_id   PK "AUTO_INCREMENT"
+        int        user_id       FK "UNIQUE, NOT NULL - rujuk USERS"
+        varchar    staff_no      UK "NOT NULL, 20 - cth UPNM001"
+        varchar    full_name        "NOT NULL, 100"
+        varchar    email            "NOT NULL, 100"
+        int        department_id FK "NOT NULL - rujuk DEPARTMENTS"
+        varchar    position         "NOT NULL, 100 - cth Senior Lecturer"
+        varchar    phone            "NULL, 20"
+        varchar    location         "NULL, 100 - cth Kuala Lumpur, Malaysia"
+        varchar    profile_photo    "NULL, 255 - path dalam /uploads/photo/"
+        text       research_area    "NULL - senarai bidang kajian utama"
+        enum       status           "active | inactive"
+        datetime   created_at       "DEFAULT CURRENT_TIMESTAMP"
+        datetime   updated_at       "ON UPDATE CURRENT_TIMESTAMP"
+    }
+
+    DEPARTMENTS {
+        int        department_id   PK "AUTO_INCREMENT"
+        varchar    department_code UK "NOT NULL, 20"
+        varchar    department_name UK "NOT NULL, 100 - cth Computer Science"
+        text       description        "NULL"
+        enum       status             "active | inactive"
+    }
+
+    EXPERTISE_CATEGORIES {
+        int        category_id    PK "AUTO_INCREMENT"
+        varchar    category_name  UK "NOT NULL, 100 - cth Cybersecurity"
+        text       description       "NULL"
+        enum       status            "active | inactive"
+        datetime   created_at        "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    EXPERTISE {
+        int        expertise_id  PK "AUTO_INCREMENT"
+        int        category_id   FK "NOT NULL - rujuk EXPERTISE_CATEGORIES"
+        varchar    expertise_name   "NOT NULL, 100 - cth Digital Forensics"
+        text       description      "NULL"
+        enum       status           "active | inactive"
+        datetime   created_at       "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    LECTURER_EXPERTISE {
+        int        lecturer_expertise_id PK "AUTO_INCREMENT - jadual penghubung (M:N)"
+        int        lecturer_id           FK "NOT NULL - rujuk LECTURERS"
+        int        expertise_id          FK "NOT NULL - rujuk EXPERTISE"
+        enum       expertise_level          "Beginner | Intermediate | Advanced | Expert"
+        int        years_experience         "NOT NULL, default 0"
+        text       interest                 "NULL - Research Interest (pilihan)"
+        text       research_interest        "NULL - minat kajian"
+        varchar    supporting_document      "NULL, 255 - sijil/bukti"
+        enum       status                   "active | inactive"
+        datetime   created_at               "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    RESEARCH {
+        int        research_id     PK "AUTO_INCREMENT"
+        int        lecturer_id     FK "NOT NULL - rujuk LECTURERS"
+        varchar    title              "NOT NULL, 255"
+        varchar    research_area      "NOT NULL, 150 - cth Cybersecurity"
+        varchar    research_category  "NULL, 100 - cth Applied Research"
+        year       year               "NULL - cth 2024"
+        enum       status             "Ongoing | Completed"
+        text       description        "NULL - abstrak/objektif"
+        varchar    supporting_document "NULL, 255"
+        datetime   created_at         "DEFAULT CURRENT_TIMESTAMP"
+        datetime   updated_at         "ON UPDATE CURRENT_TIMESTAMP"
+    }
+
+    PUBLICATIONS {
+        int        publication_id  PK "AUTO_INCREMENT"
+        int        lecturer_id     FK "NOT NULL - rujuk LECTURERS"
+        varchar    title              "NOT NULL, 255"
+        varchar    publication_type   "NOT NULL, 50 - cth Journal Article"
+        varchar    journal_publisher  "NOT NULL, 150 - cth IEEE Access"
+        year       year               "NULL"
+        enum       status             "Published | In Press | Submitted"
+        varchar    doi_link           "NULL, 255"
+        varchar    supporting_document "NULL, 255 - PDF (max 5MB)"
+        datetime   created_at         "DEFAULT CURRENT_TIMESTAMP"
+        datetime   updated_at         "ON UPDATE CURRENT_TIMESTAMP"
+    }
+
+    CERTIFICATIONS {
+        int        certification_id  PK "AUTO_INCREMENT"
+        int        lecturer_id       FK "NOT NULL - rujuk LECTURERS"
+        varchar    certification_name   "NOT NULL, 150 - cth CISSP"
+        varchar    issuing_body         "NOT NULL, 150 - cth (ISC)2"
+        date       issue_date           "NOT NULL"
+        date       expiry_date          "NULL - amaran 90 hari sebelum luput"
+        varchar    certificate_number   "NULL, 50"
+        varchar    supporting_document  "NULL, 255 - PDF/JPG/PNG (max 5MB)"
+        enum       status               "active | expired"
+        datetime   created_at           "DEFAULT CURRENT_TIMESTAMP"
+        datetime   updated_at           "ON UPDATE CURRENT_TIMESTAMP"
+    }
+
+    TRAINING {
+        int        training_id      PK "AUTO_INCREMENT"
+        int        lecturer_id      FK "NOT NULL - rujuk LECTURERS"
+        varchar    training_name       "NOT NULL, 150 - cth Ethical Hacking & Penetration Testing"
+        varchar    organizer           "NOT NULL, 150 - cth EC-Council"
+        date       date                "NOT NULL"
+        int        duration_days       "NULL, default 0"
+        enum       status              "Completed | Ongoing | Planned"
+        text       description         "NULL"
+        varchar    supporting_document "NULL, 255"
+        datetime   created_at          "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    CONSULTANCY {
+        int        consultancy_id   PK "AUTO_INCREMENT"
+        int        lecturer_id      FK "NOT NULL - rujuk LECTURERS"
+        varchar    project_name        "NOT NULL, 200"
+        varchar    organization        "NOT NULL, 150 - cth Agensi Keselamatan Negara"
+        varchar    role                "NOT NULL, 100 - cth Project Leader"
+        year       year                "NULL"
+        enum       status              "Ongoing | Completed"
+        text       description         "NULL"
+        varchar    supporting_document "NULL, 255"
+        datetime   created_at          "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    ACHIEVEMENTS {
+        int        achievement_id   PK "AUTO_INCREMENT"
+        int        lecturer_id      FK "NOT NULL - rujuk LECTURERS"
+        varchar    achievement_name    "NOT NULL, 200 - cth Best Researcher Award"
+        varchar    category            "NULL, 100 - cth Research / Teaching / Service"
+        year       year                "NULL"
+        text       description         "NULL"
+        varchar    supporting_document "NULL, 255 - PDF (max 10MB)"
+        datetime   created_at          "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    DOCUMENTS {
+        int        document_id    PK "AUTO_INCREMENT"
+        int        lecturer_id    FK "NOT NULL - pemilik dokumen, rujuk LECTURERS"
+        int        uploaded_by    FK "NOT NULL - rujuk USERS"
+        varchar    document_type     "NOT NULL, 50 - CV | Portfolio | Report | Certificate"
+        varchar    title             "NOT NULL, 150 - Title/Description"
+        varchar    file_name         "NOT NULL, 255 - nama asal fail"
+        varchar    file_path         "NOT NULL, 255 - path dalam /uploads/documents/"
+        int        file_size         "NULL - dalam bytes (max 10MB)"
+        datetime   upload_date       "DEFAULT CURRENT_TIMESTAMP"
+        enum       status            "active | archived"
+    }
+
+    ACTIVITY_LOG {
+        int        activity_id   PK "AUTO_INCREMENT"
+        int        user_id       FK "NOT NULL - rujuk USERS"
+        varchar    activity_type    "NOT NULL, 50 - insert | update | delete | upload | login"
+        varchar    entity           "NULL, 50 - jadual terlibat"
+        int        entity_id        "NULL"
+        varchar    description      "NOT NULL, 255 - cth 'Added new certification'"
+        varchar    ip_address       "NULL, 45"
+        datetime   created_at       "DEFAULT CURRENT_TIMESTAMP - untuk Recent Activities"
+    }

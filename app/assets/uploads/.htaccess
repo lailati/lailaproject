@@ -1,0 +1,10 @@
+# Uploaded files are data, never code.
+# Refuse to serve anything executable from here even if an upload slips through
+# the extension and MIME checks in upload_file().
+
+<FilesMatch "\.(?i:php|php3|php4|php5|php7|php8|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp|htm|html|svg)$">
+    Require all denied
+</FilesMatch>
+
+Options -ExecCGI -Indexes
+AddType text/plain .php .phtml .phar

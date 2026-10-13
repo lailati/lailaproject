@@ -1,0 +1,3 @@
+# Block direct web access to configuration files.
+# These files are read by PHP only; nothing here should ever be served.
+Require all denied

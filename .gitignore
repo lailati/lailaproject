@@ -1,0 +1,27 @@
+# ============================================================================
+#  FSTP Talent Map — repository ignore rules
+# ============================================================================
+
+# ------------------------------------------------------------------- OS / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# ------------------------------------------------------------------- scratch
+# Hermes build scratch and the temporary page snapshots used for screenshots.
+# Neither is part of the deliverable.
+cache/
+app/_preview_shot/
+
+# ------------------------------------------------------------------- runtime uploads
+# Keep the folders and the security .htaccess, but never commit what users
+# upload while using the system (CVs, certificates, profile photos).
+app/assets/uploads/photo/*
+!app/assets/uploads/photo/.gitkeep
+app/assets/uploads/documents/*
+!app/assets/uploads/documents/.gitkeep
+
+# ------------------------------------------------------------------- local overrides
+*.local.php

@@ -1,0 +1,3 @@
+# Block direct web access to include files.
+# includes/auth.php and includes/functions.php must never be requested directly.
+Require all denied

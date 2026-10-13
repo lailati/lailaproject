@@ -1,0 +1,3 @@
+# Block direct web access to the database folder.
+# fstp_talent_map.sql contains the schema and the demo password hashes.
+Require all denied
